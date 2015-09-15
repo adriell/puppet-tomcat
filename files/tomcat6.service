@@ -1,0 +1,21 @@
+[Unit]
+Description=Tomcat6
+After=network.target
+
+[Service]
+Type=forking
+User=tomcat6
+Group=tomcat6
+
+Environment=CATALINA_PID=/opt/server/apache-tomcat-6.0.44/tomcat6.pid
+Environment=TOMCAT_JAVA_HOME=/opt/java
+Environment=CATALINA_HOME=/opt/server/apache-tomcat-6.0.44
+Environment=CATALINA_BASE=/opt/server/apache-tomcat-6.0.44
+Environment=CATALINA_OPTS=
+Environment="JAVA_OPTS=-Dfile.encoding=UTF-8 -Dnet.sf.ehcache.skipUpdateCheck=true -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+UseParNewGC -XX:MaxPermSize=128m -Xms256m -Xmx256m"
+
+ExecStart=/opt/server/apache-tomcat-6.0.44/bin/startup.sh
+ExecStop=/bin/kill -15 $MAINPID
+
+[Install]
+WantedBy=multi-user.target
