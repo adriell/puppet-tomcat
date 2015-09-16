@@ -8,13 +8,21 @@ class tomcat{
   }
   staging::deploy{"apache-tomcat-6.0.44.tar.gz":
     source => "http://mirror.nbtelecom.com.br/apache/tomcat/tomcat-6/v6.0.44/bin/apache-tomcat-6.0.44.tar.gz",
-    target => "/opt/server/",
+    target => "/home/quantum/server/",
   }
-  #user {"tomcat6":
-  #  ensure => present,
-  #  shell  => "/bin/false",
-  #  before => [File["tomcat6.service"],Service["tomcat6"]]
-  #}
+  user {"quantum":
+    ensure => present,
+    shell  => "/bin/bash",
+    before => [File["tomcat6.service"],Service["tomcat6"]]
+  }
+  
+  file{"tomcatdirectory":
+    path   => "/home/quantum/server",
+    ensure => directory,
+    owner  => "quantum",
+    group  => "quantum",
+  }
+
   file {"tomcat6.service":
     path   => "/usr/lib/systemd/system/tomcat6.service",
     ensure => file,
@@ -24,7 +32,7 @@ class tomcat{
     source => "puppet:///modules/tomcat/tomcat6.service",
     notify => Service["tomcat6"]
   }
-  file {"/opt/server/apache-tomcat-6.0.44/conf/server.xml":
+  file {"/home/quantum/server/apache-tomcat-6.0.44/conf/server.xml":
     ensure  => file,
     content => template("tomcat/serverxml.erb"),
     notify  => Service["tomcat6"]
@@ -34,18 +42,21 @@ class tomcat{
     enable  => true,
   }
   tomcat::deployment { "Quantum":
-    path   => "/opt/quantum.war",
+    path   => "/home/quantum/Deploy/quantum.war",
     notify => Service["tomcat6"]
   }
 
   define tomcat::deployment($path){
     include tomcat
     file {"/home/quantum/web/quantum.war":
-      owner  => root,
+      owner  =>" quantum",
+      group  => "quantum",
       source => $path,
     }
    exec {"Deploy":
          path    => "/usr/bin:/usr/sbin:/bin",
+         user    => "quantum",
+         group   => "quantum",
          command => "cd /home/quantum/web && unzip *.war",
       }
   }
